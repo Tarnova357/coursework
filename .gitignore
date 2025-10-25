@@ -1,0 +1,33 @@
+# C++ specific
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.a
+*.lib
+*.gch
+
+# CLion / CMake directories
+cmake-build-debug/
+cmake-build-release/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# CLion / IntelliJ project files
+.idea/
+*.iml
+
+# Application data files
+users.txt
+rates.csv
+transactions.csv
+
+# Standard OS & editor files
+.DS_Store
+*~
+*.swp
+*.bak
+*.log

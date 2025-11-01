@@ -21,7 +21,7 @@ class Client: ISerializable {
         const std::string &passportNumber);
 
     Client(const Client &other);
-    Client (Client &&other);
+    Client (Client &&other) noexcept;
 
     ~Client();
 

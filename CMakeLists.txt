@@ -5,4 +5,6 @@ set(CMAKE_CXX_STANDARD 20)
 
 add_executable(coursework main.cpp
         Currency.cpp
-        Currency.h)
+        Currency.h
+        Client.cpp
+        Client.h)

@@ -22,8 +22,8 @@ Makefile
 
 # Application data files
 users.txt
-rates.csv
-transactions.csv
+rates.tsv
+transactions.tsv
 
 # Standard OS & editor files
 .DS_Store

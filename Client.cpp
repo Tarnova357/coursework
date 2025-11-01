@@ -147,10 +147,25 @@ void Client::display() const {
               << " | Passport: " << getPassportInfo() << std::endl;
 }
 
-std::ostream& operator<<(std::ostream& os, const Client& client) {
+void Client::serialize(std::ostream& os) const {
+    os << fullName << "\t"
+       << passportSeries << "\t"
+       << passportNumber;
+}
 
-    os << client.fullName << "\t"
-       << client.passportSeries << "\t"
-       << client.passportNumber;
-    return os;
+void Client::deserialize(std::istream& is) {
+    std::string fieldFullName, fieldSeries, fieldNumber;
+
+    if (!std::getline(is, fieldFullName, '\t')) {
+        throw std::runtime_error("Failed to read client full name");
+    }
+    if (!std::getline(is, fieldSeries, '\t')) {
+        throw std::runtime_error("Failed to read client series");
+    }
+    if (!std::getline(is, fieldNumber, '\t')) {
+        throw std::runtime_error("Failed to read client number");
+    }
+
+    setFullName(fieldFullName);
+    setPassport(fieldSeries, fieldNumber);
 }

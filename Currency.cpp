@@ -83,6 +83,8 @@ void Currency::setRates(double newBuy, double newSell) {
     sellRate = newSell;
 }
 
+
+
 bool Currency::isBaseCurrency() const {
     return code == "UAH";
 }
@@ -90,25 +92,33 @@ bool Currency::isBaseCurrency() const {
 double Currency::getSpread() const {
     return sellRate - buyRate;
 }
-
-std::ostream& operator<<(std::ostream& os, const Currency& currency) {
-    os << currency.code << "," << currency.buyRate << "," << currency.sellRate;
-    return os;
+void Currency::display() const {
+    std::cout << std::fixed << std::setprecision(2)
+              << "  [" << code << "] "
+              << "Buy: " << std::setw(7) << std::left << buyRate
+              << "Sell: " << std::setw(7) << std::left << sellRate
+              << "Spread: " << getSpread()
+              << std::endl;
+}
+void Currency::serialize(std::ostream& os) const {
+    os << code << "\t"
+       << buyRate << "\t"
+       << sellRate << "\n";
 }
 
-std::istream& operator>>(std::istream& is, Currency& currency) {
+void Currency::deserialize(std::istream& is) {
     std::string line;
     if (std::getline(is, line) && !line.empty()) {
         std::stringstream ss(line);
-        std::string codeStr;
+        std::string сodeStr;
         std::string buyRateStr;
         std::string sellRateStr;
 
         try {
-            if (!std::getline(ss, codeStr, ',')) {
+            if (!std::getline(ss, сodeStr, '\t')) {
                 throw std::runtime_error("Failed to parse code");
             }
-            if (!std::getline(ss, buyRateStr, ',')) {
+            if (!std::getline(ss, buyRateStr, '\t')) {
                 throw std::runtime_error("Failed to parse buy rate");
             }
             if (!std::getline(ss, sellRateStr)) {
@@ -118,8 +128,8 @@ std::istream& operator>>(std::istream& is, Currency& currency) {
             double buy = std::stod(buyRateStr);
             double sell = std::stod(sellRateStr);
 
-            currency.code = codeStr;
-            currency.setRates(buy, sell);
+            code = сodeStr;
+            setRates(buy, sell);
 
         } catch (const std::exception& e) {
             std::cerr << "Error parsing currency line: " << e.what()
@@ -127,6 +137,5 @@ std::istream& operator>>(std::istream& is, Currency& currency) {
             is.setstate(std::ios::failbit);
         }
     }
-    return is;
 }
 

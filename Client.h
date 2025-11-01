@@ -6,8 +6,10 @@
 #define CLIENT_H
 #include <string>
 
+#include "ISerializable.h"
 
-class Client {
+
+class Client: ISerializable {
     private:
     std::string fullName;
     std::string passportSeries;
@@ -33,6 +35,7 @@ class Client {
     void setFullName(const std::string& fullName);
     void setPassportSeries(const std::string& series);
     void setPassportNumber(const std::string& number);
+
     void validatePassportSeries(const std::string& series);
     void validatePassportNumber(const std::string& number);
     void setPassport(const std::string& series, const std::string& number);
@@ -40,7 +43,8 @@ class Client {
     bool isValid() const;
     void display() const;
 
-    friend std::ostream& operator<<(std::ostream& os, const Client& client);
+    void serialize(std::ostream& os) const;
+    void deserialize(std::istream& is);
 
 
 

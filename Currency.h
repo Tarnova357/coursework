@@ -6,8 +6,10 @@
 #define CURRENCY_H
 #include <string>
 
+#include "ISerializable.h"
 
-class Currency {
+
+class Currency: ISerializable {
 private:
     std::string code;
     double buyRate;
@@ -18,7 +20,7 @@ private:
     Currency(const std::string &code, double buyRate, double sellRate);
     Currency(const Currency& other);
     Currency(Currency&& other) noexcept;
-    ~Currency();
+    ~Currency() override;
     Currency& operator=(const Currency& other);
     Currency& operator=(Currency&& other) noexcept;
     const std::string& getCode() const;
@@ -28,8 +30,8 @@ private:
     double getSpread() const;
     bool isBaseCurrency() const;
     void display() const;
-    friend std::ostream& operator<<(std::ostream& os, const Currency& currency);
-    friend std::istream& operator>>(std::istream& is, Currency& currency);
+    void serialize(std::ostream& os) const override;
+    void deserialize(std::istream& is) override;
 };
 
 

@@ -7,4 +7,5 @@ add_executable(coursework main.cpp
         Currency.cpp
         Currency.h
         Client.cpp
-        Client.h)
+        Client.h
+        ISerializable.h)

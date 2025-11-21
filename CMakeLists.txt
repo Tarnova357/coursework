@@ -12,4 +12,6 @@ add_executable(coursework main.cpp
         Transaction.cpp
         Transaction.h
         BuyTransaction.cpp
-        BuyTransaction.h)
+        BuyTransaction.h
+        SellTransaction.cpp
+        SellTransaction.h)

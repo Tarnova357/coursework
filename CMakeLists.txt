@@ -10,4 +10,6 @@ add_executable(coursework main.cpp
         Client.h
         ISerializable.h
         Transaction.cpp
-        Transaction.h)
+        Transaction.h
+        BuyTransaction.cpp
+        BuyTransaction.h)

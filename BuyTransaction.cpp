@@ -1,0 +1,22 @@
+//
+// Created by SergiyT on 01.11.2025.
+//
+
+#include "BuyTransaction.h"
+BuyTransaction::BuyTransaction() : Transaction() {}
+
+BuyTransaction::BuyTransaction(const Client& client, const std::string& currencyCode, double amount)
+    : Transaction(client, currencyCode, amount) {}
+
+BuyTransaction::~BuyTransaction() {
+    std::cout << "BuyTransaction [Destructor] called." << std::endl;
+}
+
+std::string BuyTransaction::getOperationType() const {
+    return "BUY";
+}
+
+void BuyTransaction::calculate(double buyRate, double sellRate) {
+    (void)sellRate;
+    amountBase = amountCurrency * buyRate;
+}

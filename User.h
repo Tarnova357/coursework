@@ -18,6 +18,7 @@ public:
     User(const std::string& username, const std::string& password, bool isAdmin);
 
     const std::string& getUsername() const;
+    const std::string& getPassword() const;
     bool checkPassword(const std::string& inputPassword) const;
     bool isAdmin() const;
 

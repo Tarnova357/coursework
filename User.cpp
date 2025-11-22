@@ -27,6 +27,10 @@ const std::string& User::getUsername() const {
     return username;
 }
 
+const std::string& User::getPassword() const {
+    return password;
+}
+
 bool User::checkPassword(const std::string& inputPassword) const {
     return password == inputPassword;
 }

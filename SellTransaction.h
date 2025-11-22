@@ -8,6 +8,7 @@
 
 
 class SellTransaction: public Transaction{
+    public:
     SellTransaction();
     SellTransaction(const Client& client, const std::string& currencyCode, double amount);
 

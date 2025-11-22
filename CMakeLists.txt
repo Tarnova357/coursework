@@ -16,4 +16,6 @@ add_executable(coursework main.cpp
         SellTransaction.cpp
         SellTransaction.h
         User.cpp
-        User.h)
+        User.h
+        DataManager.cpp
+        DataManager.h)

@@ -6,7 +6,8 @@
 
 SellTransaction::SellTransaction(): Transaction() {}
 
-SellTransaction::SellTransaction(const Client &client, const std::string &currencyCode, double amount): Transaction(client, currencyCode, amount){}
+SellTransaction::SellTransaction(const Client &client, const std::string &currencyCode, double amount)
+    : Transaction(client, currencyCode, amount){}
 
 SellTransaction::~SellTransaction() {
     std::cout << "SellTransaction [Destructor] called."<<std::endl;

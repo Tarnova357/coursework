@@ -43,8 +43,11 @@ class DataManager {
     bool changeUserPassword(const std::string& username, const std::string& newPass);
     const std::vector<User>& getUsers() const;
 
-
-
+    const std::vector<Currency>& getCurrencies() const;
+    Currency* getCurrencyByCode(const std::string& code);
+    void addCurrency(const std::string& code, double buy, double sell);
+    void updateCurrencyRate(const std::string& code, double buy, double sell);
+    bool deleteCurrency(const std::string& code);
 
 };
 

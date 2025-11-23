@@ -209,6 +209,51 @@ bool DataManager::changeUserPassword(const std::string &username, const std::str
 }
 
 
+const std::vector<Currency>& DataManager::getCurrencies() const {
+    return m_currencies;
+}
+
+Currency* DataManager::getCurrencyByCode(const std::string& code) {
+    for (auto& currency : m_currencies) {
+        if (currency.getCode() == code) {
+            return &currency;
+        }
+    }
+    return nullptr;
+}
+
+void DataManager::addCurrency(const std::string& code, double buy, double sell) {
+    if (getCurrencyByCode(code) != nullptr) {
+        throw std::invalid_argument("Currency already exists.");
+    }
+    m_currencies.emplace_back(code, buy, sell);
+    saveCurrencies();
+}
+
+void DataManager::updateCurrencyRate(const std::string& code, double buy, double sell) {
+    Currency* curr = getCurrencyByCode(code);
+    if (curr) {
+        curr->setRates(buy, sell);
+        saveCurrencies();
+    } else {
+        throw std::runtime_error("Currency not found!");
+    }
+}
+
+bool DataManager::deleteCurrency(const std::string& code) {
+    auto it = std::find_if(m_currencies.begin(), m_currencies.end(),
+                           [&code](const Currency& c) { return c.getCode() == code; });
+
+    if (it != m_currencies.end()) {
+        m_currencies.erase(it);
+        saveCurrencies();
+        return true;
+    }
+    return false;
+}
+
+
+
 
 
 

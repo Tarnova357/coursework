@@ -56,6 +56,13 @@ class DataManager {
     bool editTransactionClient(int id, const std::string& name, const std::string& series, const std::string& num);
     const std::vector<std::unique_ptr<Transaction>>& getTransactions() const;
 
+    std::vector<const Transaction*> searchTransactionsByClient(const std::string& partialName) const;
+    void sortTransactionsByDate(bool ascending = true);
+    void sortTransactionsByAmount(bool ascending = true);
+    std::vector<const Transaction*> filterTransactionsByCurrency(const std::string& code) const;
+    std::vector<const Transaction*> filterTransactionsByType(const std::string& type) const;
+    std::vector<const Transaction*> filterTransactionsByCurrencyAndType(const std::string& code, const std::string& type) const;
+    std::vector<const Transaction*> filterTransactionsByMinAmount(double minAmount) const;
 };
 
 

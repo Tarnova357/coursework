@@ -301,7 +301,65 @@ const std::vector<std::unique_ptr<Transaction>>& DataManager::getTransactions() 
     return m_transactions;
 }
 
+std::vector<const Transaction*> DataManager::searchTransactionsByClient(const std::string& partialName) const {
+    std::vector<const Transaction*> results;
+    for (const auto& tx : m_transactions) {
+        if (tx->getClient().getFullName().find(partialName) != std::string::npos) {
+            results.push_back(tx.get());
+        }
+    }
+    return results;
+}
 
+void DataManager::sortTransactionsByDate(bool ascending) {
+    std::sort(m_transactions.begin(), m_transactions.end(),
+              [ascending](const std::unique_ptr<Transaction>& a, const std::unique_ptr<Transaction>& b) {
+                  if (ascending) return a->getTimestamp() < b->getTimestamp();
+                  else return a->getTimestamp() > b->getTimestamp();
+              });
+}
+
+void DataManager::sortTransactionsByAmount(bool ascending) {
+    std::sort(m_transactions.begin(), m_transactions.end(),
+              [ascending](const std::unique_ptr<Transaction>& a, const std::unique_ptr<Transaction>& b) {
+                  if (ascending) return a->getAmountBase() < b->getAmountBase();
+                  else return a->getAmountBase() > b->getAmountBase();
+              });
+}
+
+std::vector<const Transaction*> DataManager::filterTransactionsByCurrency(const std::string& code) const {
+    std::vector<const Transaction*> results;
+    for (const auto& tx : m_transactions) {
+        if (tx->getCurrencyCode() == code) results.push_back(tx.get());
+    }
+    return results;
+}
+
+std::vector<const Transaction*> DataManager::filterTransactionsByType(const std::string& type) const {
+    std::vector<const Transaction*> results;
+    for (const auto& tx : m_transactions) {
+        if (tx->getOperationType() == type) results.push_back(tx.get());
+    }
+    return results;
+}
+
+std::vector<const Transaction*> DataManager::filterTransactionsByCurrencyAndType(const std::string& code, const std::string& type) const {
+    std::vector<const Transaction*> results;
+    for (const auto& tx : m_transactions) {
+        if (tx->getCurrencyCode() == code && tx->getOperationType() == type) {
+            results.push_back(tx.get());
+        }
+    }
+    return results;
+}
+
+std::vector<const Transaction*> DataManager::filterTransactionsByMinAmount(double minAmount) const {
+    std::vector<const Transaction*> results;
+    for (const auto& tx : m_transactions) {
+        if (tx->getAmountBase() >= minAmount) results.push_back(tx.get());
+    }
+    return results;
+}
 
 
 

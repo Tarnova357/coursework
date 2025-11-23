@@ -4,6 +4,7 @@
 
 #include "DataManager.h"
 
+#include <algorithm>
 #include <fstream>
 #include <sstream>
 
@@ -151,5 +152,63 @@ void DataManager::saveAllData() {
     saveCurrencies();
     saveTransactions();
 }
+
+User *DataManager::authenticate(const std::string &username, const std::string &password) {
+    for (auto& user : m_users) {
+        if (user.getUsername() == username) {
+            if (user.getPassword() == password) {
+                return &user;
+            }
+            return nullptr;
+        }
+    }
+    return nullptr;
+}
+
+void DataManager::addUser(const std::string &username, const std::string &password) {
+    for (auto& user : m_users) {
+        if (user.getUsername() == username) {
+            throw std::invalid_argument("User with this username already exists.");
+        }
+    }
+    m_users.emplace_back(username, password, 0);
+    saveUsers();
+}
+
+bool DataManager::deleteUser(const std::string &username) {
+    if (username == "admin") {
+        std::cerr << "Cannot delete default admin." << std::endl;
+        return false;
+    }
+    auto it = std::find_if(m_users.begin(), m_users.end(),
+        [&username](const User& user) {
+        return user.getUsername() == username;
+        });
+    if (it != m_users.end()) {
+        m_users.erase(it);
+        saveUsers();
+        return true;
+    }
+    return false;
+}
+
+const std::vector<User>& DataManager::getUsers() const {
+    return m_users;
+}
+
+bool DataManager::changeUserPassword(const std::string &username, const std::string &newPassword) {
+    auto it = std::find_if(m_users.begin(), m_users.end(),
+                           [&username](const User& u) { return u.getUsername() == username; });
+
+    if (it != m_users.end()) {
+        it->setPassword(newPassword);
+        saveUsers();
+        return true;
+    }
+    return false;
+}
+
+
+
 
 

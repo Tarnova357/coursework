@@ -10,13 +10,13 @@ User::User() : username(""), password(""), admin(false) {}
 
 User::User(const std::string& Username, const std::string& Password, bool isAdmin) {
     if (username.empty()) {
-        throw std::invalid_argument("Username cannot be empty.");
+        throw std::invalid_argument("Ім'я користувача не може бути порожнім.");
     }
     if (password.empty()) {
-        throw std::invalid_argument("Password cannot be empty.");
+        throw std::invalid_argument("Пароль не може бути порожнім.");
     }
     if (username.find(':') != std::string::npos || password.find(':') != std::string::npos) {
-        throw std::invalid_argument("Username and password cannot contain ':' character.");
+        throw std::invalid_argument("Ім'я та пароль не можуть містити символ ':'.");
     }
     username=Username;
     password=Password;
@@ -41,10 +41,10 @@ bool User::isAdmin() const {
 
 void User::setPassword(const std::string& newPassword) {
     if (newPassword.empty()) {
-        throw std::invalid_argument("New password cannot be empty.");
+        throw std::invalid_argument("Новий пароль не може бути порожнім.");
     }
     if (newPassword.find(':') != std::string::npos) {
-        throw std::invalid_argument("Password cannot contain ':' character.");
+        throw std::invalid_argument("Пароль не може містити символ ':'.");
     }
     password = newPassword;
 }

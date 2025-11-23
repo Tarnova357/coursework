@@ -15,7 +15,7 @@ Currency::Currency(const std::string &code, double buyRate, double sellRate)
     try {
         setRates(buyRate, sellRate);
     } catch (const std::invalid_argument& e) {
-        std::cerr << "Warning: Invalid rates for " << code << ". Setting to 0. Error: "
+        std::cerr << "Невірні курси валют для " << code << ".Встановлюєм на 0. Помилка: "
             << e.what() << std::endl;
         buyRate = 0.0;
         sellRate = 0.0;
@@ -33,7 +33,7 @@ Currency::Currency(Currency&& other) noexcept
 }
 
 Currency::~Currency() {
-    std::cout << "Currency [Destructor] called for: " << code << std::endl;
+    std::cout << "Було викликано деструктор для Currency: " << code << std::endl;
 }
 
 Currency& Currency::operator=(const Currency& other) {
@@ -73,10 +73,10 @@ double Currency::getSellRate() const {
 
 void Currency::setRates(double newBuy, double newSell) {
     if (newBuy <= 0 || newSell <= 0) {
-        throw std::invalid_argument("Rates must be positive numbers.");
+        throw std::invalid_argument("Курси валют повинні бути більше 0.");
     }
     if (newBuy >= newSell) {
-        throw std::invalid_argument("Buy rate must be lower than sell rate.");
+        throw std::invalid_argument("Курс купівлі має бути нижчим за курс продажу.");
     }
 
     buyRate = newBuy;
@@ -95,9 +95,9 @@ double Currency::getSpread() const {
 void Currency::display() const {
     std::cout << std::fixed << std::setprecision(2)
               << "  [" << code << "] "
-              << "Buy: " << std::setw(7) << std::left << buyRate
-              << "Sell: " << std::setw(7) << std::left << sellRate
-              << "Spread: " << getSpread()
+              << "Купівля: " << std::setw(7) << std::left << buyRate
+              << "Продаж: " << std::setw(7) << std::left << sellRate
+              << "Різниця: " << getSpread()
               << std::endl;
 }
 void Currency::serialize(std::ostream& os) const {
@@ -116,13 +116,13 @@ void Currency::deserialize(std::istream& is) {
 
         try {
             if (!std::getline(ss, сodeStr, '\t')) {
-                throw std::runtime_error("Failed to parse code");
+                throw std::runtime_error("Не вдалося прочитати код валюти");
             }
             if (!std::getline(ss, buyRateStr, '\t')) {
-                throw std::runtime_error("Failed to parse buy rate");
+                throw std::runtime_error("Не вдалося прочитати курс купівлі");
             }
-            if (!std::getline(ss, sellRateStr)) {
-                throw std::runtime_error("Failed to parse sell rate");
+            if (!std::getline(ss, sellRateStr)) { // читаємо до кінця рядка
+                throw std::runtime_error("Не вдалося прочитати курс продажу");
             }
 
             double buy = std::stod(buyRateStr);
@@ -132,8 +132,8 @@ void Currency::deserialize(std::istream& is) {
             setRates(buy, sell);
 
         } catch (const std::exception& e) {
-            std::cerr << "Error parsing currency line: " << e.what()
-                      << " | Line: '" << line << "'" << std::endl;
+            std::cerr << "[Помилка] Збій читання валюти: " << e.what()
+                      << " | Рядок: '" << line << "'" << std::endl;
             is.setstate(std::ios::failbit);
         }
     }

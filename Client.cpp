@@ -18,7 +18,7 @@ Client::Client(const std::string& Name, const std::string& series, const std::st
         setFullName(Name);
         setPassport(series, number);
     } catch (const std::invalid_argument& e) {
-        std::cerr << "Warning: Invalid client data. " << e.what() << std::endl;
+        std::cerr << "Попередження: невірні данні клієнта. " << e.what() << std::endl;
 
         fullName = "N/A";
         passportSeries = "XX";
@@ -43,7 +43,7 @@ Client::Client(Client&& other) noexcept
 }
 
 Client::~Client() {
-    std::cout << "Client [Destructor] called for: " << fullName << std::endl;
+    std::cout << "Було викликано деструктор для Client: " << fullName << std::endl;
 }
 
 Client& Client::operator=(const Client& other) {
@@ -82,7 +82,7 @@ const std::string& Client::getPassportNumber() const {
 
 void Client::setFullName(const std::string& Name) {
     if (Name.empty()) {
-        throw std::invalid_argument("Full name cannot be empty.");
+        throw std::invalid_argument("Ім'я клієнта не може бути порожнім.");
     }
     bool hasLetter = false;
     for (char c : Name) {
@@ -92,7 +92,7 @@ void Client::setFullName(const std::string& Name) {
         }
     }
     if (!hasLetter) {
-        throw std::invalid_argument("Full name must contain letters.");
+        throw std::invalid_argument("Ім'я клієнта повинно містити літери");
     }
     fullName = Name;
 }
@@ -110,7 +110,7 @@ void Client::setPassportNumber(const std::string& number) {
 void Client::validatePassportSeries(const std::string& series) {
     for (char c : series) {
         if (!std::isupper(static_cast<unsigned char>(c))) {
-            throw std::invalid_argument("Passport series must be uppercase letters.");
+            throw std::invalid_argument("Серія паспорта повинна бути у верхньому регістрі.");
         }
     }
 }
@@ -118,7 +118,7 @@ void Client::validatePassportSeries(const std::string& series) {
 void Client::validatePassportNumber(const std::string& number) {
     for (char c : number) {
         if (!std::isdigit(static_cast<unsigned char>(c))) {
-            throw std::invalid_argument("Passport number must contain only digits.");
+            throw std::invalid_argument("Номер паспорту повинен містити лише цифри.");
         }
     }
 }
@@ -143,8 +143,8 @@ bool Client::isValid() const {
 }
 
 void Client::display() const {
-    std::cout << "  Client: " << std::setw(30) << std::left << fullName
-              << " | Passport: " << getPassportInfo() << std::endl;
+    std::cout << "  Клієнт: " << std::setw(30) << std::left << fullName
+              << " | Паспорт: " << getPassportInfo() << std::endl;
 }
 
 void Client::serialize(std::ostream& os) const {
@@ -154,18 +154,18 @@ void Client::serialize(std::ostream& os) const {
 }
 
 void Client::deserialize(std::istream& is) {
-    std::string fieldFullName, fieldSeries, fieldNumber;
+    std::string fullName, series, number;
 
-    if (!std::getline(is, fieldFullName, '\t')) {
-        throw std::runtime_error("Failed to read client full name");
+    if (!std::getline(is, fullName, '\t')) {
+        throw std::runtime_error("Не вдалося прочитати ім'я клієнта");
     }
-    if (!std::getline(is, fieldSeries, '\t')) {
-        throw std::runtime_error("Failed to read client series");
+    if (!std::getline(is, series, '\t')) {
+        throw std::runtime_error("Не вдалося прочитати серію паспорта");
     }
-    if (!std::getline(is, fieldNumber, '\t')) {
-        throw std::runtime_error("Failed to read client number");
+    if (!std::getline(is, number, '\t')) {
+        throw std::runtime_error("Не вдалося прочитати номер паспорта");
     }
 
-    setFullName(fieldFullName);
-    setPassport(fieldSeries, fieldNumber);
+    setFullName(fullName);
+    setPassport(series, number);
 }

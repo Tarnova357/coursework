@@ -9,11 +9,11 @@ BuyTransaction::BuyTransaction(const Client& client, const std::string& currency
     : Transaction(client, currencyCode, amount) {}
 
 BuyTransaction::~BuyTransaction() {
-    std::cout << "BuyTransaction [Destructor] called." << std::endl;
+    std::cout << "Був викликаний деструктор BuyTransaction." << std::endl;
 }
 
 std::string BuyTransaction::getOperationType() const {
-    return "BUY";
+    return "КУПІВЛЯ";
 }
 
 void BuyTransaction::calculate(double buyRate, double sellRate) {

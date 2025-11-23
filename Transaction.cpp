@@ -46,7 +46,7 @@ Transaction::Transaction(Transaction&& other) noexcept
 }
 
 Transaction::~Transaction() {
-    std::cout << "Transaction [Destructor] called for: " << currencyCode << std::endl;
+    std::cout << "Будо викликано деструктор для Transaction: " << id << std::endl;
 }
 
 Transaction& Transaction::operator=(const Transaction& other) {
@@ -109,7 +109,7 @@ time_t Transaction::getTimestamp() const {
 
 void Transaction::setAmountCurrency(double amount) {
     if (amount <= 0.0) {
-        throw std::invalid_argument("Transaction amount must be positive.");
+        throw std::invalid_argument("Сума має бути позитивною..");
     }
 
     amountCurrency = amount;
@@ -117,7 +117,7 @@ void Transaction::setAmountCurrency(double amount) {
 
 void Transaction::display() const {
     char tBuf[26]; ctime_s(tBuf, sizeof(tBuf), &timestamp); tBuf[24]='\0';
-    std::cout << " ID:" << id << " | " << getOperationType() << " | " << tBuf << "\n";
+    std::cout << " ID:" << id << " | Тип: " << getOperationType() << " | Час: " << tBuf << "\n";
     clientData.display();
     std::cout << "  " << amountCurrency << " " << currencyCode << " -> " << amountBase << " UAH\n";
     std::cout << "------------------------------------------\n";
@@ -129,12 +129,27 @@ void Transaction::serialize(std::ostream& os) const {
     os << "\t" << currencyCode << "\t" << amountCurrency << "\t" << amountBase << "\n";
 }
 void Transaction::deserialize(std::istream& is) {
-    std::string tStr;
-    if(std::getline(is, tStr, '\t')) timestamp = std::stol(tStr);
-    clientData.deserialize(is);
-    std::getline(is, currencyCode, '\t');
-    std::getline(is, tStr, '\t'); amountCurrency = std::stod(tStr);
-    std::getline(is, tStr); amountBase = std::stod(tStr);
+    try {
+        std::string temp;
+
+        if (!std::getline(is, temp, '\t')) return;
+        timestamp = static_cast<time_t>(std::stol(temp));
+
+        clientData.deserialize(is);
+
+        if (!std::getline(is, currencyCode, '\t')) throw std::runtime_error("Помилка коду валюти");
+
+        if (!std::getline(is, temp, '\t')) throw std::runtime_error("Помилка суми валюти");
+        amountCurrency = std::stod(temp);
+
+        if (!std::getline(is, temp)) throw std::runtime_error("Помилка базової суми");
+        amountBase = std::stod(temp);
+
+    } catch (const std::exception& e) {
+        std::cerr << "[Помилка] Збій десеріалізації транзакції: " << e.what() << std::endl;
+
+        is.setstate(std::ios::failbit);
+    }
 }
 
 

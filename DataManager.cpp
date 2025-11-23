@@ -30,7 +30,7 @@ void DataManager::loadUsers() {
             if (line.empty()) {continue;}
             size_t pos = line.find_first_of(":");
             if (pos == std::string::npos) {
-                std::cerr <<"[Error] Skipped corrupted line in users.txt:" <<line << std::endl;
+                std::cerr <<"[Попередження] Пропущено пошкоджений рядок у users.txt:" <<line << std::endl;
                 continue;
             }
             std::string username = line.substr(0, pos);
@@ -40,7 +40,7 @@ void DataManager::loadUsers() {
                 bool isAdmin = (username == "admin");
                 m_users.emplace_back(username, password, isAdmin);
             } catch (const std::exception& e) {
-                std::cerr << "[Error] User creation failed: " << e.what() << std::endl;
+                std::cerr << "[Помилка] Не вдалося завантажити користувача: " << e.what() << std::endl;
             }
             file.close();
         }
@@ -54,7 +54,7 @@ void DataManager::loadUsers() {
         }
 
         if (!adminExists) {
-            std::cout << "[Info] Admin not found. Creating default admin..." << std::endl;
+            std::cout << "[Інфо] Адміністратора не знайдено. Створення стандартного адміна..." << std::endl;
             m_users.insert(m_users.begin(), User("admin", "admin123", true));
             saveUsers();
         }
@@ -75,13 +75,13 @@ void DataManager::loadCurrencies() {
                 file.clear();
                 std::string dummy;
                 std::getline(file, dummy);
-                std::cerr << "[Warning] Corrupted data found in rates file. Skipped line: '"
+                std::cerr << "[Попередження] Пошкоджені дані у файлі курсів. Рядок пропущено: '"
                           << dummy << "'" << std::endl;
                 continue;
             }
             m_currencies.emplace_back(temp);
         } catch (const std::exception& e) {
-            std::cerr << "[Error] Error loading currency: " << e.what() << std::endl;
+            std::cerr << "[Помилка] Помилка завантаження валюти: " << e.what() << std::endl;
         }
     }
 }
@@ -98,25 +98,29 @@ void DataManager::loadTransactions() {
         int id;
         std::string type;
 
-        if (!(ss  >> id >> type)) {continue;}
+        if (!(ss >> id >> type)) {
+            std::cerr << "[Попередження] Не вдалося прочитати заголовок транзакції. Рядок пропущено.\n";
+            continue;
+        }
+
         if (id > m_lastId) m_lastId = id;
         std::unique_ptr<Transaction> temp;
 
         try {
-            if (type =="BUY") {
+            if (type =="КУПІВЛЯ") {
                 temp = std::make_unique<BuyTransaction>();
-            } else if (type =="SELL") {
+            } else if (type =="ПРОДАЖ") {
                 temp = std::make_unique<SellTransaction>();
             } else {
-                std::cerr << "[Warning] Unknown transaction type: '" << type
-                          << "' in line: '" << line << "'. Skipped." << std::endl;
+                std::cerr << "[Попередження] Невідомий тип транзакції: '" << type
+                          << "' В рядку: '" << line << "'. Пропущено." << std::endl;
                 continue;
             }
             temp->setId(id);
             temp->deserialize(ss);
             m_transactions.emplace_back(std::move(temp));
         } catch (const std::exception& e) {
-            std::cerr << "[Error] Transaction skipped: " << e.what() << std::endl;
+            std::cerr << "[Помилка] Збій завантаження транзакції ID " << id << ": " << e.what() << "\n";
         }
     }
 }
@@ -179,7 +183,7 @@ User *DataManager::authenticate(const std::string &username, const std::string &
 void DataManager::addUser(const std::string &username, const std::string &password) {
     for (auto& user : m_users) {
         if (user.getUsername() == username) {
-            throw std::invalid_argument("User with this username already exists.");
+            throw std::invalid_argument("Користувач з таким логіном вже існує..");
         }
     }
     m_users.emplace_back(username, password, 0);
@@ -188,7 +192,7 @@ void DataManager::addUser(const std::string &username, const std::string &passwo
 
 bool DataManager::deleteUser(const std::string &username) {
     if (username == "admin") {
-        std::cerr << "Cannot delete default admin." << std::endl;
+        std::cerr << "Неможливо видалити стандартного адміна." << std::endl;
         return false;
     }
     auto it = std::find_if(m_users.begin(), m_users.end(),
@@ -235,7 +239,7 @@ Currency* DataManager::getCurrencyByCode(const std::string& code) {
 
 void DataManager::addCurrency(const std::string& code, double buy, double sell) {
     if (getCurrencyByCode(code) != nullptr) {
-        throw std::invalid_argument("Currency already exists.");
+        throw std::invalid_argument("Така валюта вже існує.");
     }
     m_currencies.emplace_back(code, buy, sell);
     saveCurrencies();
@@ -247,7 +251,7 @@ void DataManager::updateCurrencyRate(const std::string& code, double buy, double
         curr->setRates(buy, sell);
         saveCurrencies();
     } else {
-        throw std::runtime_error("Currency not found!");
+        throw std::runtime_error("Валюту не знайдено.");
     }
 }
 
@@ -264,7 +268,7 @@ bool DataManager::deleteCurrency(const std::string& code) {
 }
 
 void DataManager::addTransaction(std::unique_ptr<Transaction> transaction) {
-    if (!transaction) throw std::invalid_argument("Null transaction provided.");
+    if (!transaction) throw std::invalid_argument("Транзакція пуста (NULL).");
 
     m_lastId++;
     transaction->setId(m_lastId);

@@ -10,11 +10,11 @@ SellTransaction::SellTransaction(const Client &client, const std::string &curren
     : Transaction(client, currencyCode, amount){}
 
 SellTransaction::~SellTransaction() {
-    std::cout << "SellTransaction [Destructor] called."<<std::endl;
+    std::cout << "Був викликаний деструктор SellTransaction."<<std::endl;
 }
 
 std::string SellTransaction::getOperationType() const {
-    return "SELL";
+    return "ПРОДАЖ";
 }
 
 void SellTransaction::calculate(double buyRate, double sellRate) {

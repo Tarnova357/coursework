@@ -51,6 +51,11 @@ class DataManager {
     void updateCurrencyRate(const std::string& code, double buy, double sell);
     bool deleteCurrency(const std::string& code);
 
+    void addTransaction(std::unique_ptr<Transaction> transaction);
+    bool deleteTransaction(int id);
+    bool editTransactionClient(int id, const std::string& name, const std::string& series, const std::string& num);
+    const std::vector<std::unique_ptr<Transaction>>& getTransactions() const;
+
 };
 
 

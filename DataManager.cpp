@@ -263,6 +263,45 @@ bool DataManager::deleteCurrency(const std::string& code) {
     return false;
 }
 
+void DataManager::addTransaction(std::unique_ptr<Transaction> transaction) {
+    if (!transaction) throw std::invalid_argument("Null transaction provided.");
+
+    m_lastId++;
+    transaction->setId(m_lastId);
+
+    m_transactions.push_back(std::move(transaction));
+    appendTransactionToFile(*m_transactions.back());
+}
+
+bool DataManager::deleteTransaction(int id) {
+    auto it = std::find_if(m_transactions.begin(), m_transactions.end(),
+                           [id](const std::unique_ptr<Transaction>& t) { return t->getId() == id; });
+
+    if (it != m_transactions.end()) {
+        m_transactions.erase(it);
+        saveTransactions();
+        return true;
+    }
+    return false;
+}
+
+bool DataManager::editTransactionClient(int id, const std::string& name, const std::string& series, const std::string& num) {
+    auto it = std::find_if(m_transactions.begin(), m_transactions.end(),
+                           [id](const std::unique_ptr<Transaction>& t) { return t->getId() == id; });
+
+    if (it != m_transactions.end()) {
+        (*it)->setClient(Client(name, series, num));
+        saveTransactions();
+        return true;
+    }
+    return false;
+}
+
+const std::vector<std::unique_ptr<Transaction>>& DataManager::getTransactions() const {
+    return m_transactions;
+}
+
+
 
 
 

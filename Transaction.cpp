@@ -75,8 +75,20 @@ Transaction& Transaction::operator=(Transaction&& other) noexcept {
     return *this;
 }
 
+void Transaction::setId(int ID) {
+    id = ID;
+}
+
+int Transaction::getId() const {
+    return id;
+}
+
 const Client& Transaction::getClient() const {
     return clientData;
+}
+
+void Transaction::setClient(const Client& client) {
+    clientData = client;
 }
 
 const std::string& Transaction::getCurrencyCode() const {
@@ -104,58 +116,25 @@ void Transaction::setAmountCurrency(double amount) {
 }
 
 void Transaction::display() const {
-    char timeBuf[26];
-    ctime_s(timeBuf, sizeof(timeBuf), &timestamp);
-    timeBuf[24] = '\0';
-
-    std::cout << "------------------------------------------\n"
-              << " Transaction: " << std::setw(5) << std::left << getOperationType()
-              << " | " << timeBuf << "\n";
-
+    char tBuf[26]; ctime_s(tBuf, sizeof(tBuf), &timestamp); tBuf[24]='\0';
+    std::cout << " ID:" << id << " | " << getOperationType() << " | " << tBuf << "\n";
     clientData.display();
-
-    std::cout << "  Currency: " << std::setw(3) << currencyCode
-              << std::fixed << std::setprecision(2)
-              << " | Amount (Curr): " << std::setw(10) << amountCurrency
-              << " | Amount (Base): " << amountBase
-              << "\n------------------------------------------" << std::endl;
+    std::cout << "  " << amountCurrency << " " << currencyCode << " -> " << amountBase << " UAH\n";
+    std::cout << "------------------------------------------\n";
 }
 
 void Transaction::serialize(std::ostream& os) const {
-    os << getOperationType() << "\t"
-       << timestamp << "\t";
-
+    os << id << "\t" <<getOperationType() << "\t" << timestamp << "\t";
     clientData.serialize(os);
-
-    os << "\t" << currencyCode << "\t"
-       << amountCurrency << "\t"
-       << amountBase << "\n";
+    os << "\t" << currencyCode << "\t" << amountCurrency << "\t" << amountBase << "\n";
 }
 void Transaction::deserialize(std::istream& is) {
-    std::string line;
-    std::getline(is, line);
-    if (line.empty()) return;
-
-    std::stringstream ss(line);
-
-    std::string temp;
-
-    try {
-        std::getline(ss, temp, '\t');
-        timestamp =static_cast<time_t>(std::stol(temp));
-
-        clientData.deserialize(ss);
-
-        std::getline(ss, currencyCode, '\t');
-
-        std::getline(ss, temp, '\t');
-        amountCurrency = std::stod(temp);
-
-        std::getline(ss, temp);
-        amountBase = std::stod(temp);
-
-    } catch (const std::exception& e) {
-        std::cerr << "Error deserializing transaction: " << e.what() << std::endl;
-        is.setstate(std::ios::failbit);
-    }
+    std::string tStr;
+    if(std::getline(is, tStr, '\t')) timestamp = std::stol(tStr);
+    clientData.deserialize(is);
+    std::getline(is, currencyCode, '\t');
+    std::getline(is, tStr, '\t'); amountCurrency = std::stod(tStr);
+    std::getline(is, tStr); amountBase = std::stod(tStr);
 }
+
+

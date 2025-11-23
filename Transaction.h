@@ -10,6 +10,7 @@
 
 class Transaction: ISerializable {
 protected:
+    int id;
     Client clientData;
     std::string currencyCode;
     double amountCurrency;
@@ -30,6 +31,10 @@ public:
 
     virtual std::string getOperationType() const = 0;
     virtual void calculate(double buyRate, double sellRate) = 0;
+
+    void setId(int id);
+    int getId() const;
+    void setClient(const Client& client);
 
     const Client& getClient() const;
     const std::string& getCurrencyCode() const;

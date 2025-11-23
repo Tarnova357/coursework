@@ -17,6 +17,7 @@ class DataManager {
     std::vector<User> m_users;
     std::vector<Currency> m_currencies;
     std::vector<std::unique_ptr<Transaction>> m_transactions;
+    int m_lastId = 0;
 
     const std::string FILE_USERS = "users.txt";
     const std::string FILE_RATES = "rates.tsv";
@@ -30,6 +31,7 @@ class DataManager {
     void saveUsers() const;
     void saveCurrencies() const;
     void saveTransactions() const;
+    void appendTransactionToFile(const Transaction& tx) const;
 
     public:
     DataManager();

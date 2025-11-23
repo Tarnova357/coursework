@@ -95,9 +95,11 @@ void DataManager::loadTransactions() {
     while (std::getline(file, line)) {
         if (line.empty()) {continue;}
         std::stringstream ss(line);
+        int id;
         std::string type;
 
-        if (!(ss >> type)) {continue;}
+        if (!(ss  >> id >> type)) {continue;}
+        if (id > m_lastId) m_lastId = id;
         std::unique_ptr<Transaction> temp;
 
         try {
@@ -110,6 +112,7 @@ void DataManager::loadTransactions() {
                           << "' in line: '" << line << "'. Skipped." << std::endl;
                 continue;
             }
+            temp->setId(id);
             temp->deserialize(ss);
             m_transactions.emplace_back(std::move(temp));
         } catch (const std::exception& e) {
@@ -151,6 +154,14 @@ void DataManager::saveAllData() {
     saveUsers();
     saveCurrencies();
     saveTransactions();
+}
+
+void DataManager::appendTransactionToFile(const Transaction& tx) const {
+    std::ofstream file(FILE_TRANSACTIONS, std::ios::app);
+    if (file.is_open()) {
+        file.imbue(std::locale::classic());
+        tx.serialize(file);
+    }
 }
 
 User *DataManager::authenticate(const std::string &username, const std::string &password) {

@@ -17,8 +17,8 @@ private:
     void pause();
 
 
-    int getIntInput();
-    double getDoubleInput();
+    int getIntInput(const std::string& prompt);
+    double getDoubleInput(const std::string& prompt);
     std::string getStringInput(const std::string& prompt);
 
     void showLoginMenu();

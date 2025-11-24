@@ -32,17 +32,18 @@ void Application::pause() {
     std::cin.get();
 }
 
-int Application::getIntInput() {
+int Application::getIntInput(const std::string& prompt) {
+    std::cout << prompt;
     int value;
     while (!(std::cin >> value)) {
         std::cin.clear();
         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        std::cout << "Невірний ввід. Будь ласка, введіть ціле число: ";
+        std::cout << "Невірний ввід. Будь ласка, введіть ціле число.\n"<<prompt;
     }
     return value;
 }
 
-double Application::getDoubleInput() {
+double Application::getDoubleInput(const std::string& prompt) {
     double value;
     while (!(std::cin >> value)) {
         std::cin.clear();
@@ -65,9 +66,8 @@ void Application::showLoginMenu() {
     std::cout << "=== ПУНКТ ОБМІНУ ВАЛЮТ ===\n";
     std::cout << "1. Вхід\n";
     std::cout << "0. Вихід\n";
-    std::cout << "> ";
 
-    int choice = getIntInput();
+    int choice = getIntInput("> ");
 
     switch (choice) {
         case 0:
@@ -107,9 +107,7 @@ void Application::showMainMenu() {
     std::cout << "5. Змінити свій пароль\n";
     std::cout << "6. Допомога\n";
     std::cout << "0. Вихід з акаунту\n";
-    std::cout << "> ";
-
-    int choice = getIntInput();
+    int choice = getIntInput("> ");
 
     try {
         switch (choice) {
@@ -154,9 +152,9 @@ void Application::menuAdminManageUsers() {
     for (const auto& u : dataManager.getUsers()) {
         std::cout << " - " << u.getUsername() << (u.isAdmin() ? " [АДМІН]" : "") << "\n";
     }
-    std::cout << "\n1. Додати користувача\n2. Видалити користувача\n3. Скинути пароль користувача\n0. Назад\n> ";
+    std::cout << "\n1. Додати користувача\n2. Видалити користувача\n3. Скинути пароль користувача\n0. Назад\n";
 
-    int c = getIntInput();
+    int c = getIntInput("> ");
     if (c == 0) return;
 
     try {
@@ -199,27 +197,25 @@ void Application::menuManageCurrencies() {
     clearScreen();
     std::cout << "=== КУРСИ ВАЛЮТ ===\n";
     for (const auto& c : dataManager.getCurrencies()) c.display();
-    std::cout << "\n1. Оновити курс\n2. Додати валюту\n3. Видалити валюту\n0. Назад\n> ";
+    std::cout << "\n1. Оновити курс\n2. Додати валюту\n3. Видалити валюту\n0. Назад\n ";
 
-    int c = getIntInput();
+    int c = getIntInput("> ");
     if (c == 0) return;
 
     try {
         switch (c) {
             case 1: {
-                std::string code = getStringInput("Код валюти (напр. USD): ");
-                std::cout << "Введіть ціну покупки: ";
-                double buy = getDoubleInput();
-                std::cout << "\n" << "Введіть ціну продажу:" << "\n";
-                double sell = getDoubleInput();
+                std::string code = getStringInput("Код валюти: ");
+                double buy = getDoubleInput("Новий курс купівлі: ");
+                double sell = getDoubleInput("Новий курс продажу: ");
                 dataManager.updateCurrencyRate(code, buy, sell);
                 std::cout << "Успішно: Курс оновлено.\n";
                 break;
             }
             case 2: {
                 std::string code = getStringInput("Новий код валюти: ");
-                double buy = getDoubleInput();
-                double sell = getDoubleInput();
+                double buy = getDoubleInput("Курс купівлі: ");
+                double sell = getDoubleInput("Курс продажу: ");
                 dataManager.addCurrency(code, buy, sell);
                 std::cout << "Успішно: Валюту додано.\n";
                 break;
@@ -249,12 +245,11 @@ void Application::menuTransactions() {
         std::cout << "2. Купити валюту (Клієнт продає)\n";
         std::cout << "3. Редагувати транзакцію (Дані клієнта)\n";
         std::cout << "4. Видалити транзакцію\n";
-        std::cout << "0. Назад\n> ";
+        std::cout << "0. Назад\n";
 
-        int c = getIntInput();
+        int c = getIntInput("> ");
         if (c == 0) break;
 
-        // [ЗМІНА] Switch case
         switch (c) {
             case 1: createTransaction("ПРОДАЖ"); break;
             case 2: createTransaction("КУПІВЛЯ"); break;
@@ -262,9 +257,9 @@ void Application::menuTransactions() {
             case 3:
             case 4: {
                 std::cout << "Введіть ID транзакції: ";
-                int id = getIntInput();
+                int id = getIntInput("Введіть ID транзакції: ");
                 try {
-                    if (c == 3) { // Edit
+                    if (c == 3) {
                         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                         std::cout << "Нове ім'я клієнта: ";
                         std::string n;
@@ -277,7 +272,7 @@ void Application::menuTransactions() {
                             std::cout << "Успішно: Оновлено.\n";
                         else
                             std::cout << "Помилка: ID не знайдено.\n";
-                    } else { // Delete
+                    } else {
                         if (dataManager.deleteTransaction(id))
                             std::cout << "Успішно: Видалено.\n";
                         else
@@ -308,8 +303,7 @@ void Application::createTransaction(const std::string& type) {
         std::string series = getStringInput("Серія паспорта: ");
         std::string number = getStringInput("Номер паспорта: ");
         std::string code = getStringInput("Код валюти: ");
-        std::cout << "Сума у валюті: ";
-        double amount = getDoubleInput();
+        double amount = getDoubleInput("Сума у валюті: ");
 
         Currency* curr = dataManager.getCurrencyByCode(code);
         if (!curr) throw std::runtime_error("Валюту не знайдено.");
@@ -350,15 +344,14 @@ void Application::menuReports() {
         std::cout << "5. Фільтр за типом (КУПІВЛЯ/ПРОДАЖ)\n";
         std::cout << "6. Фільтр за мін. сумою\n";
         std::cout << "7. [Приклад] Клієнти, що купують/продають певну валюту\n";
-        std::cout << "0. Назад\n> ";
+        std::cout << "0. Назад\n";
 
-        int c = getIntInput();
+        int c = getIntInput("> ");
         if (c == 0) break;
 
         std::vector<const Transaction*> list;
 
         try {
-            // [ЗМІНА] Switch case
             switch (c) {
                 case 1:
                     dataManager.sortTransactionsByDate(false);
@@ -382,12 +375,12 @@ void Application::menuReports() {
                     list = dataManager.filterTransactionsByType(getStringInput("Тип (КУПІВЛЯ/ПРОДАЖ): "));
                     break;
                 case 6:
-                    list = dataManager.filterTransactionsByMinAmount(getDoubleInput());
+                    list = dataManager.filterTransactionsByMinAmount(getDoubleInput("Мінімальна сума (грн): "));
                     break;
                 case 7: {
-                    std::string code = getStringInput("Валюта (напр. USD): ");
+                    std::string code = getStringInput("Валюта: ");
                     std::cout << "Що робить клієнт? (1-Купує, 2-Продає): ";
-                    std::string type = (getIntInput() == 1) ? "ПРОДАЖ" : "КУПІВЛЯ";
+                    std::string type = (getIntInput("Що робить клієнт? (1-Купує, 2-Продає):") == 1) ? "ПРОДАЖ" : "КУПІВЛЯ";
                     list = dataManager.filterTransactionsByCurrencyAndType(code, type);
                     break;
                 }

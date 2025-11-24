@@ -18,7 +18,7 @@ Client::Client(const std::string& Name, const std::string& series, const std::st
         setFullName(Name);
         setPassport(series, number);
     } catch (const std::invalid_argument& e) {
-        std::cerr << "РџРѕРїРµСЂРµРґР¶РµРЅРЅСЏ: РЅРµРІС–СЂРЅС– РґР°РЅРЅС– РєР»С–С”РЅС‚Р°. " << e.what() << std::endl;
+        std::cerr << "Попередження: невірні данні клієнта. " << e.what() << std::endl;
 
         fullName = "N/A";
         passportSeries = "XX";
@@ -43,7 +43,7 @@ Client::Client(Client&& other) noexcept
 }
 
 Client::~Client() {
-    std::cout << "Р‘СѓР»Рѕ РІРёРєР»РёРєР°РЅРѕ РґРµСЃС‚СЂСѓРєС‚РѕСЂ РґР»СЏ Client: " << fullName << std::endl;
+    std::cout << "Було викликано деструктор для Client: " << fullName << std::endl;
 }
 
 Client& Client::operator=(const Client& other) {
@@ -82,17 +82,12 @@ const std::string& Client::getPassportNumber() const {
 
 void Client::setFullName(const std::string& Name) {
     if (Name.empty()) {
-        throw std::invalid_argument("Р†Рј'СЏ РєР»С–С”РЅС‚Р° РЅРµ РјРѕР¶Рµ Р±СѓС‚Рё РїРѕСЂРѕР¶РЅС–Рј.");
+        throw std::invalid_argument("Ім'я клієнта не може бути порожнім.");
     }
-    bool hasLetter = false;
     for (char c : Name) {
-        if (std::isalpha(static_cast<unsigned char>(c))) {
-            hasLetter = true;
-            break;
+        if (std::isdigit(static_cast<unsigned char>(c))) {
+            throw std::invalid_argument("Цифри в імені заборонені.");
         }
-    }
-    if (!hasLetter) {
-        throw std::invalid_argument("Р†Рј'СЏ РєР»С–С”РЅС‚Р° РїРѕРІРёРЅРЅРѕ РјС–СЃС‚РёС‚Рё Р»С–С‚РµСЂРё");
     }
     fullName = Name;
 }
@@ -108,17 +103,16 @@ void Client::setPassportNumber(const std::string& number) {
 }
 
 void Client::validatePassportSeries(const std::string& series) {
-    for (char c : series) {
-        if (!std::isupper(static_cast<unsigned char>(c))) {
-            throw std::invalid_argument("РЎРµСЂС–СЏ РїР°СЃРїРѕСЂС‚Р° РїРѕРІРёРЅРЅР° Р±СѓС‚Рё Сѓ РІРµСЂС…РЅСЊРѕРјСѓ СЂРµРіС–СЃС‚СЂС–.");
-        }
+    if (series.empty()) {
+        throw std::invalid_argument("Серія паспорту не може бути порожньою.");
     }
+    if (series.length() != 2) throw std::invalid_argument("Серія має бути 2 символи.");
 }
 
 void Client::validatePassportNumber(const std::string& number) {
     for (char c : number) {
         if (!std::isdigit(static_cast<unsigned char>(c))) {
-            throw std::invalid_argument("РќРѕРјРµСЂ РїР°СЃРїРѕСЂС‚Сѓ РїРѕРІРёРЅРµРЅ РјС–СЃС‚РёС‚Рё Р»РёС€Рµ С†РёС„СЂРё.");
+            throw std::invalid_argument("Номер паспорту повинен містити лише цифри.");
         }
     }
 }
@@ -143,8 +137,8 @@ bool Client::isValid() const {
 }
 
 void Client::display() const {
-    std::cout << "  РљР»С–С”РЅС‚: " << std::setw(30) << std::left << fullName
-              << " | РџР°СЃРїРѕСЂС‚: " << getPassportInfo() << std::endl;
+    std::cout << "  Клієнт: " << std::setw(30) << std::left << fullName
+              << " | Паспорт: " << getPassportInfo() << std::endl;
 }
 
 void Client::serialize(std::ostream& os) const {
@@ -157,13 +151,13 @@ void Client::deserialize(std::istream& is) {
     std::string fullName, series, number;
 
     if (!std::getline(is, fullName, '\t')) {
-        throw std::runtime_error("РќРµ РІРґР°Р»РѕСЃСЏ РїСЂРѕС‡РёС‚Р°С‚Рё С–Рј'СЏ РєР»С–С”РЅС‚Р°");
+        throw std::runtime_error("Не вдалося прочитати ім'я клієнта");
     }
     if (!std::getline(is, series, '\t')) {
-        throw std::runtime_error("РќРµ РІРґР°Р»РѕСЃСЏ РїСЂРѕС‡РёС‚Р°С‚Рё СЃРµСЂС–СЋ РїР°СЃРїРѕСЂС‚Р°");
+        throw std::runtime_error("Не вдалося прочитати серію паспорта");
     }
     if (!std::getline(is, number, '\t')) {
-        throw std::runtime_error("РќРµ РІРґР°Р»РѕСЃСЏ РїСЂРѕС‡РёС‚Р°С‚Рё РЅРѕРјРµСЂ РїР°СЃРїРѕСЂС‚Р°");
+        throw std::runtime_error("Не вдалося прочитати номер паспорта");
     }
 
     setFullName(fullName);

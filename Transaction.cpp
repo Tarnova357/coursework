@@ -7,14 +7,16 @@
 #include <iomanip>
 
 Transaction::Transaction()
-    : clientData(),
+    : id(0),
+      clientData(),
       currencyCode("N/A"),
       amountCurrency(0.0),
       amountBase(0.0),
       timestamp(0) {}
 
 Transaction::Transaction(const Client& client, const std::string& currencyCode, double amount)
-    : clientData(client),
+    : id(0),
+      clientData(client),
       currencyCode(currencyCode),
       amountBase(0.0),
       timestamp(std::time(nullptr)) {
@@ -46,7 +48,7 @@ Transaction::Transaction(Transaction&& other) noexcept
 }
 
 Transaction::~Transaction() {
-    std::cout << "Ð‘ÑƒÐ´Ð¾ Ð²Ð¸ÐºÐ»Ð¸ÐºÐ°Ð½Ð¾ Ð´ÐµÑÑ‚Ñ€ÑƒÐºÑ‚Ð¾Ñ€ Ð´Ð»Ñ Transaction: " << id << std::endl;
+    std::cout << "Áóäî âèêëèêàíî äåñòðóêòîð äëÿ Transaction: " << id << std::endl;
 }
 
 Transaction& Transaction::operator=(const Transaction& other) {
@@ -109,7 +111,7 @@ time_t Transaction::getTimestamp() const {
 
 void Transaction::setAmountCurrency(double amount) {
     if (amount <= 0.0) {
-        throw std::invalid_argument("Ð¡ÑƒÐ¼Ð° Ð¼Ð°Ñ” Ð±ÑƒÑ‚Ð¸ Ð¿Ð¾Ð·Ð¸Ñ‚Ð¸Ð²Ð½Ð¾ÑŽ..");
+        throw std::invalid_argument("Ñóìà ìàº áóòè ïîçèòèâíîþ..");
     }
 
     amountCurrency = amount;
@@ -117,7 +119,8 @@ void Transaction::setAmountCurrency(double amount) {
 
 void Transaction::display() const {
     char tBuf[26]; ctime_s(tBuf, sizeof(tBuf), &timestamp); tBuf[24]='\0';
-    std::cout << " ID:" << id << " | Ð¢Ð¸Ð¿: " << getOperationType() << " | Ð§Ð°Ñ: " << tBuf << "\n";
+    std::string idStr = (id == 0) ? "[ÍÎÂÀ]" : std::to_string(id);
+    std::cout << " ID:" << idStr << " | Òèï: " << getOperationType() << " | ×àñ: " << tBuf << "\n";
     clientData.display();
     std::cout << "  " << amountCurrency << " " << currencyCode << " -> " << amountBase << " UAH\n";
     std::cout << "------------------------------------------\n";
@@ -137,16 +140,16 @@ void Transaction::deserialize(std::istream& is) {
 
         clientData.deserialize(is);
 
-        if (!std::getline(is, currencyCode, '\t')) throw std::runtime_error("ÐŸÐ¾Ð¼Ð¸Ð»ÐºÐ° ÐºÐ¾Ð´Ñƒ Ð²Ð°Ð»ÑŽÑ‚Ð¸");
+        if (!std::getline(is, currencyCode, '\t')) throw std::runtime_error("Ïîìèëêà êîäó âàëþòè");
 
-        if (!std::getline(is, temp, '\t')) throw std::runtime_error("ÐŸÐ¾Ð¼Ð¸Ð»ÐºÐ° ÑÑƒÐ¼Ð¸ Ð²Ð°Ð»ÑŽÑ‚Ð¸");
+        if (!std::getline(is, temp, '\t')) throw std::runtime_error("Ïîìèëêà ñóìè âàëþòè");
         amountCurrency = std::stod(temp);
 
-        if (!std::getline(is, temp)) throw std::runtime_error("ÐŸÐ¾Ð¼Ð¸Ð»ÐºÐ° Ð±Ð°Ð·Ð¾Ð²Ð¾Ñ— ÑÑƒÐ¼Ð¸");
+        if (!std::getline(is, temp)) throw std::runtime_error("Ïîìèëêà áàçîâî¿ ñóìè");
         amountBase = std::stod(temp);
 
     } catch (const std::exception& e) {
-        std::cerr << "[ÐŸÐ¾Ð¼Ð¸Ð»ÐºÐ°] Ð—Ð±Ñ–Ð¹ Ð´ÐµÑÐµÑ€Ñ–Ð°Ð»Ñ–Ð·Ð°Ñ†Ñ–Ñ— Ñ‚Ñ€Ð°Ð½Ð·Ð°ÐºÑ†Ñ–Ñ—: " << e.what() << std::endl;
+        std::cerr << "[Ïîìèëêà] Çá³é äåñåð³àë³çàö³¿ òðàíçàêö³¿: " << e.what() << std::endl;
 
         is.setstate(std::ios::failbit);
     }

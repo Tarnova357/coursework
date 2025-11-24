@@ -40,6 +40,7 @@ class DataManager {
     void saveAllData();
 
     User* authenticate(const std::string& username, const std::string& password);
+    User* getUserByName(const std::string& username);
     void addUser(const std::string& username, const std::string& password);
     bool deleteUser(const std::string& username);
     bool changeUserPassword(const std::string& username, const std::string& newPass);

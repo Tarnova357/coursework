@@ -15,7 +15,7 @@ Currency::Currency(const std::string &code, double buyRate, double sellRate)
     try {
         setRates(buyRate, sellRate);
     } catch (const std::invalid_argument& e) {
-        std::cerr << "РќРµРІС–СЂРЅС– РєСѓСЂСЃРё РІР°Р»СЋС‚ РґР»СЏ " << code << ".Р’СЃС‚Р°РЅРѕРІР»СЋС”Рј РЅР° 0. РџРѕРјРёР»РєР°: "
+        std::cerr << "Невірні курси валют для " << code << ".Встановлюєм на 0. Помилка: "
             << e.what() << std::endl;
         buyRate = 0.0;
         sellRate = 0.0;
@@ -33,7 +33,7 @@ Currency::Currency(Currency&& other) noexcept
 }
 
 Currency::~Currency() {
-    std::cout << "Р‘СѓР»Рѕ РІРёРєР»РёРєР°РЅРѕ РґРµСЃС‚СЂСѓРєС‚РѕСЂ РґР»СЏ Currency: " << code << std::endl;
+    std::cout << "Було викликано деструктор для Currency: " << code << std::endl;
 }
 
 Currency& Currency::operator=(const Currency& other) {
@@ -73,10 +73,10 @@ double Currency::getSellRate() const {
 
 void Currency::setRates(double newBuy, double newSell) {
     if (newBuy <= 0 || newSell <= 0) {
-        throw std::invalid_argument("РљСѓСЂСЃРё РІР°Р»СЋС‚ РїРѕРІРёРЅРЅС– Р±СѓС‚Рё Р±С–Р»СЊС€Рµ 0.");
+        throw std::invalid_argument("Курси валют повинні бути більше 0.");
     }
     if (newBuy >= newSell) {
-        throw std::invalid_argument("РљСѓСЂСЃ РєСѓРїС–РІР»С– РјР°С” Р±СѓС‚Рё РЅРёР¶С‡РёРј Р·Р° РєСѓСЂСЃ РїСЂРѕРґР°Р¶Сѓ.");
+        throw std::invalid_argument("Курс купівлі має бути нижчим за курс продажу.");
     }
 
     buyRate = newBuy;
@@ -95,9 +95,9 @@ double Currency::getSpread() const {
 void Currency::display() const {
     std::cout << std::fixed << std::setprecision(2)
               << "  [" << code << "] "
-              << "РљСѓРїС–РІР»СЏ: " << std::setw(7) << std::left << buyRate
-              << "РџСЂРѕРґР°Р¶: " << std::setw(7) << std::left << sellRate
-              << "Р С–Р·РЅРёС†СЏ: " << getSpread()
+              << "Купівля: " << std::setw(7) << std::left << buyRate
+              << "Продаж: " << std::setw(7) << std::left << sellRate
+              << "Різниця: " << getSpread()
               << std::endl;
 }
 void Currency::serialize(std::ostream& os) const {
@@ -110,30 +110,30 @@ void Currency::deserialize(std::istream& is) {
     std::string line;
     if (std::getline(is, line) && !line.empty()) {
         std::stringstream ss(line);
-        std::string СЃodeStr;
+        std::string codeStr;
         std::string buyRateStr;
         std::string sellRateStr;
 
         try {
-            if (!std::getline(ss, СЃodeStr, '\t')) {
-                throw std::runtime_error("РќРµ РІРґР°Р»РѕСЃСЏ РїСЂРѕС‡РёС‚Р°С‚Рё РєРѕРґ РІР°Р»СЋС‚Рё");
+            if (!std::getline(ss, codeStr, '\t')) {
+                throw std::runtime_error("Не вдалося прочитати код валюти");
             }
             if (!std::getline(ss, buyRateStr, '\t')) {
-                throw std::runtime_error("РќРµ РІРґР°Р»РѕСЃСЏ РїСЂРѕС‡РёС‚Р°С‚Рё РєСѓСЂСЃ РєСѓРїС–РІР»С–");
+                throw std::runtime_error("Не вдалося прочитати курс купівлі");
             }
-            if (!std::getline(ss, sellRateStr)) { // С‡РёС‚Р°С”РјРѕ РґРѕ РєС–РЅС†СЏ СЂСЏРґРєР°
-                throw std::runtime_error("РќРµ РІРґР°Р»РѕСЃСЏ РїСЂРѕС‡РёС‚Р°С‚Рё РєСѓСЂСЃ РїСЂРѕРґР°Р¶Сѓ");
+            if (!std::getline(ss, sellRateStr)) {
+                throw std::runtime_error("Не вдалося прочитати курс продажу");
             }
 
             double buy = std::stod(buyRateStr);
             double sell = std::stod(sellRateStr);
 
-            code = СЃodeStr;
+            code = codeStr;
             setRates(buy, sell);
 
         } catch (const std::exception& e) {
-            std::cerr << "[РџРѕРјРёР»РєР°] Р—Р±С–Р№ С‡РёС‚Р°РЅРЅСЏ РІР°Р»СЋС‚Рё: " << e.what()
-                      << " | Р СЏРґРѕРє: '" << line << "'" << std::endl;
+            std::cerr << "[Помилка] Збій читання валюти: " << e.what()
+                      << " | Рядок: '" << line << "'" << std::endl;
             is.setstate(std::ios::failbit);
         }
     }

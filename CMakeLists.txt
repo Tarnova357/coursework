@@ -18,4 +18,6 @@ add_executable(coursework main.cpp
         User.cpp
         User.h
         DataManager.cpp
-        DataManager.h)
+        DataManager.h
+        Application.cpp
+        Application.h)

@@ -30,7 +30,7 @@ void DataManager::loadUsers() {
             if (line.empty()) {continue;}
             size_t pos = line.find_first_of(":");
             if (pos == std::string::npos) {
-                std::cerr <<"[РџРѕРїРµСЂРµРґР¶РµРЅРЅСЏ] РџСЂРѕРїСѓС‰РµРЅРѕ РїРѕС€РєРѕРґР¶РµРЅРёР№ СЂСЏРґРѕРє Сѓ users.txt:" <<line << std::endl;
+                std::cerr <<"[Попередження] Пропущено пошкоджений рядок у users.txt:" <<line << std::endl;
                 continue;
             }
             std::string username = line.substr(0, pos);
@@ -40,24 +40,23 @@ void DataManager::loadUsers() {
                 bool isAdmin = (username == "admin");
                 m_users.emplace_back(username, password, isAdmin);
             } catch (const std::exception& e) {
-                std::cerr << "[РџРѕРјРёР»РєР°] РќРµ РІРґР°Р»РѕСЃСЏ Р·Р°РІР°РЅС‚Р°Р¶РёС‚Рё РєРѕСЂРёСЃС‚СѓРІР°С‡Р°: " << e.what() << std::endl;
-            }
-            file.close();
-        }
-
-        bool adminExists = false;
-        for (const auto& user : m_users) {
-            if (user.getUsername() == "admin") {
-                adminExists = true;
-                break;
+                std::cerr << "[Помилка] Не вдалося завантажити користувача: " << e.what() << std::endl;
             }
         }
+        file.close();
 
-        if (!adminExists) {
-            std::cout << "[Р†РЅС„Рѕ] РђРґРјС–РЅС–СЃС‚СЂР°С‚РѕСЂР° РЅРµ Р·РЅР°Р№РґРµРЅРѕ. РЎС‚РІРѕСЂРµРЅРЅСЏ СЃС‚Р°РЅРґР°СЂС‚РЅРѕРіРѕ Р°РґРјС–РЅР°..." << std::endl;
-            m_users.insert(m_users.begin(), User("admin", "admin123", true));
-            saveUsers();
+    }
+    bool adminExists = false;
+    for (const auto& user : m_users) {
+        if (user.getUsername() == "admin") {
+            adminExists = true;
+            break;
         }
+    }
+    if (!adminExists) {
+        std::cout << "[Інфо] Адміністратора не знайдено. Створення стандартного адміна..." << std::endl;
+        m_users.insert(m_users.begin(), User("admin", "admin123", true));
+        saveUsers();
     }
 }
 
@@ -75,15 +74,17 @@ void DataManager::loadCurrencies() {
                 file.clear();
                 std::string dummy;
                 std::getline(file, dummy);
-                std::cerr << "[РџРѕРїРµСЂРµРґР¶РµРЅРЅСЏ] РџРѕС€РєРѕРґР¶РµРЅС– РґР°РЅС– Сѓ С„Р°Р№Р»С– РєСѓСЂСЃС–РІ. Р СЏРґРѕРє РїСЂРѕРїСѓС‰РµРЅРѕ: '"
+                std::cerr << "[Попередження] Пошкоджені дані у файлі курсів. Рядок пропущено: '"
                           << dummy << "'" << std::endl;
                 continue;
             }
             m_currencies.emplace_back(temp);
         } catch (const std::exception& e) {
-            std::cerr << "[РџРѕРјРёР»РєР°] РџРѕРјРёР»РєР° Р·Р°РІР°РЅС‚Р°Р¶РµРЅРЅСЏ РІР°Р»СЋС‚Рё: " << e.what() << std::endl;
+            file.close();
+            std::cerr << "[Помилка] Помилка завантаження валюти: " << e.what() << std::endl;
         }
     }
+    file.close();
 }
 
 void DataManager::loadTransactions() {
@@ -99,7 +100,7 @@ void DataManager::loadTransactions() {
         std::string type;
 
         if (!(ss >> id >> type)) {
-            std::cerr << "[РџРѕРїРµСЂРµРґР¶РµРЅРЅСЏ] РќРµ РІРґР°Р»РѕСЃСЏ РїСЂРѕС‡РёС‚Р°С‚Рё Р·Р°РіРѕР»РѕРІРѕРє С‚СЂР°РЅР·Р°РєС†С–С—. Р СЏРґРѕРє РїСЂРѕРїСѓС‰РµРЅРѕ.\n";
+            std::cerr << "[Попередження] Не вдалося прочитати заголовок транзакції. Рядок пропущено.\n";
             continue;
         }
 
@@ -107,22 +108,24 @@ void DataManager::loadTransactions() {
         std::unique_ptr<Transaction> temp;
 
         try {
-            if (type =="РљРЈРџР†Р’Р›РЇ") {
+            if (type =="КУПІВЛЯ") {
                 temp = std::make_unique<BuyTransaction>();
-            } else if (type =="РџР РћР”РђР–") {
+            } else if (type =="ПРОДАЖ") {
                 temp = std::make_unique<SellTransaction>();
             } else {
-                std::cerr << "[РџРѕРїРµСЂРµРґР¶РµРЅРЅСЏ] РќРµРІС–РґРѕРјРёР№ С‚РёРї С‚СЂР°РЅР·Р°РєС†С–С—: '" << type
-                          << "' Р’ СЂСЏРґРєСѓ: '" << line << "'. РџСЂРѕРїСѓС‰РµРЅРѕ." << std::endl;
+                std::cerr << "[Попередження] Невідомий тип транзакції: '" << type
+                          << "' В рядку: '" << line << "'. Пропущено." << std::endl;
                 continue;
             }
             temp->setId(id);
             temp->deserialize(ss);
             m_transactions.emplace_back(std::move(temp));
         } catch (const std::exception& e) {
-            std::cerr << "[РџРѕРјРёР»РєР°] Р—Р±С–Р№ Р·Р°РІР°РЅС‚Р°Р¶РµРЅРЅСЏ С‚СЂР°РЅР·Р°РєС†С–С— ID " << id << ": " << e.what() << "\n";
+            file.close();
+            std::cerr << "[Помилка] Збій завантаження транзакції ID " << id << ": " << e.what() << "\n";
         }
     }
+    file.close();
 }
 
 void DataManager::saveUsers() const {
@@ -132,6 +135,7 @@ void DataManager::saveUsers() const {
             usersFile << user.getUsername() << ":" << user.getPassword() << "\n";
         }
     }
+    usersFile.close();
 }
 
 void DataManager::saveCurrencies() const {
@@ -142,6 +146,7 @@ void DataManager::saveCurrencies() const {
             curr.serialize(ratesFile);
         }
     }
+    ratesFile.close();
 }
 
 void DataManager::saveTransactions() const {
@@ -152,6 +157,7 @@ void DataManager::saveTransactions() const {
             tx->serialize(txFile);
         }
     }
+    txFile.close();
 }
 
 void DataManager::saveAllData() {
@@ -166,6 +172,7 @@ void DataManager::appendTransactionToFile(const Transaction& tx) const {
         file.imbue(std::locale::classic());
         tx.serialize(file);
     }
+    file.close();
 }
 
 User *DataManager::authenticate(const std::string &username, const std::string &password) {
@@ -180,10 +187,19 @@ User *DataManager::authenticate(const std::string &username, const std::string &
     return nullptr;
 }
 
+User* DataManager::getUserByName(const std::string& username) {
+    for (auto& user : m_users) {
+        if (user.getUsername() == username) {
+            return &user;
+        }
+    }
+    return nullptr;
+}
+
 void DataManager::addUser(const std::string &username, const std::string &password) {
     for (auto& user : m_users) {
         if (user.getUsername() == username) {
-            throw std::invalid_argument("РљРѕСЂРёСЃС‚СѓРІР°С‡ Р· С‚Р°РєРёРј Р»РѕРіС–РЅРѕРј РІР¶Рµ С–СЃРЅСѓС”..");
+            throw std::invalid_argument("Користувач з таким логіном вже існує..");
         }
     }
     m_users.emplace_back(username, password, 0);
@@ -192,7 +208,7 @@ void DataManager::addUser(const std::string &username, const std::string &passwo
 
 bool DataManager::deleteUser(const std::string &username) {
     if (username == "admin") {
-        std::cerr << "РќРµРјРѕР¶Р»РёРІРѕ РІРёРґР°Р»РёС‚Рё СЃС‚Р°РЅРґР°СЂС‚РЅРѕРіРѕ Р°РґРјС–РЅР°." << std::endl;
+        std::cerr << "Неможливо видалити стандартного адміна." << std::endl;
         return false;
     }
     auto it = std::find_if(m_users.begin(), m_users.end(),
@@ -239,7 +255,7 @@ Currency* DataManager::getCurrencyByCode(const std::string& code) {
 
 void DataManager::addCurrency(const std::string& code, double buy, double sell) {
     if (getCurrencyByCode(code) != nullptr) {
-        throw std::invalid_argument("РўР°РєР° РІР°Р»СЋС‚Р° РІР¶Рµ С–СЃРЅСѓС”.");
+        throw std::invalid_argument("Така валюта вже існує.");
     }
     m_currencies.emplace_back(code, buy, sell);
     saveCurrencies();
@@ -251,7 +267,7 @@ void DataManager::updateCurrencyRate(const std::string& code, double buy, double
         curr->setRates(buy, sell);
         saveCurrencies();
     } else {
-        throw std::runtime_error("Р’Р°Р»СЋС‚Сѓ РЅРµ Р·РЅР°Р№РґРµРЅРѕ.");
+        throw std::runtime_error("Валюту не знайдено.");
     }
 }
 
@@ -268,7 +284,7 @@ bool DataManager::deleteCurrency(const std::string& code) {
 }
 
 void DataManager::addTransaction(std::unique_ptr<Transaction> transaction) {
-    if (!transaction) throw std::invalid_argument("РўСЂР°РЅР·Р°РєС†С–СЏ РїСѓСЃС‚Р° (NULL).");
+    if (!transaction) throw std::invalid_argument("Транзакція пуста (NULL).");
 
     m_lastId++;
     transaction->setId(m_lastId);

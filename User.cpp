@@ -8,18 +8,18 @@
 
 User::User() : username(""), password(""), admin(false) {}
 
-User::User(const std::string& Username, const std::string& Password, bool isAdmin) {
-    if (username.empty()) {
-        throw std::invalid_argument("Р†Рј'СЏ РєРѕСЂРёСЃС‚СѓРІР°С‡Р° РЅРµ РјРѕР¶Рµ Р±СѓС‚Рё РїРѕСЂРѕР¶РЅС–Рј.");
+User::User(const std::string& t_username, const std::string& t_password, bool isAdmin) {
+    if (t_username.empty()) {
+        throw std::invalid_argument("Ім'я користувача не може бути порожнім.");
     }
-    if (password.empty()) {
-        throw std::invalid_argument("РџР°СЂРѕР»СЊ РЅРµ РјРѕР¶Рµ Р±СѓС‚Рё РїРѕСЂРѕР¶РЅС–Рј.");
+    if (t_password.empty()) {
+        throw std::invalid_argument("Пароль не може бути порожнім.");
     }
-    if (username.find(':') != std::string::npos || password.find(':') != std::string::npos) {
-        throw std::invalid_argument("Р†Рј'СЏ С‚Р° РїР°СЂРѕР»СЊ РЅРµ РјРѕР¶СѓС‚СЊ РјС–СЃС‚РёС‚Рё СЃРёРјРІРѕР» ':'.");
+    if (t_username.find(':') != std::string::npos || t_password.find(':') != std::string::npos) {
+        throw std::invalid_argument("Ім'я та пароль не можуть містити символ ':'.");
     }
-    username=Username;
-    password=Password;
+    username=t_username;
+    password=t_password;
     admin=isAdmin;
 }
 
@@ -41,10 +41,10 @@ bool User::isAdmin() const {
 
 void User::setPassword(const std::string& newPassword) {
     if (newPassword.empty()) {
-        throw std::invalid_argument("РќРѕРІРёР№ РїР°СЂРѕР»СЊ РЅРµ РјРѕР¶Рµ Р±СѓС‚Рё РїРѕСЂРѕР¶РЅС–Рј.");
+        throw std::invalid_argument("Новий пароль не може бути порожнім.");
     }
     if (newPassword.find(':') != std::string::npos) {
-        throw std::invalid_argument("РџР°СЂРѕР»СЊ РЅРµ РјРѕР¶Рµ РјС–СЃС‚РёС‚Рё СЃРёРјРІРѕР» ':'.");
+        throw std::invalid_argument("Пароль не може містити символ ':'.");
     }
     password = newPassword;
 }

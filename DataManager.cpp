@@ -382,6 +382,21 @@ std::vector<const Transaction*> DataManager::filterTransactionsByMinAmount(doubl
 }
 
 
+void DataManager::saveReportToFile(const std::vector<const Transaction*>& list, const std::string& filename) const {
+    std::ofstream file(filename);
+
+    if (!file.is_open()) {
+        throw std::runtime_error("Не вдалося створити файл. Перевірте назву або права доступу.");
+    }
+
+    file.imbue(std::locale::classic());
+
+    for (const auto* tx : list) {
+        tx->serialize(file);
+    }
+    file.close();
+}
+
 
 
 

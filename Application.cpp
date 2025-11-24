@@ -395,11 +395,27 @@ void Application::menuReports() {
                     std::cout << "Невірний вибір.\n";
             }
 
-            // Виводимо список, якщо вибір був валідним
             if (c >= 1 && c <= 7) {
                 printTransactionList(list);
-            }
+                if (!list.empty()) {
+                    std::cout << "\nЗберегти цей звіт у файл? (y - так, інше - ні): ";
+                    std::string save;
+                    std::cin >> save;
 
+                    if (save == "y" || save == "Y") {
+                        std::string filename = getStringInput("Введіть назву файлу: ");
+                        if (filename.find('.') == std::string::npos) {
+                            filename += ".txt";
+                        }
+                        try {
+                            dataManager.saveReportToFile(list, filename);
+                            std::cout << "Успішно! Дані збережено у файл '" << filename << "'.\n";
+                        } catch (const std::exception& e) {
+                            std::cout << "Помилка запису: " << e.what() << "\n";
+                        }
+                    }
+                }
+            }
         } catch (const std::exception& e) {
             std::cout << "Помилка пошуку: " << e.what() << "\n";
         }

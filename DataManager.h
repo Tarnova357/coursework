@@ -64,6 +64,8 @@ class DataManager {
     std::vector<const Transaction*> filterTransactionsByType(const std::string& type) const;
     std::vector<const Transaction*> filterTransactionsByCurrencyAndType(const std::string& code, const std::string& type) const;
     std::vector<const Transaction*> filterTransactionsByMinAmount(double minAmount) const;
+
+    void saveReportToFile(const std::vector<const Transaction*>& list, const std::string& filename) const;
 };
 
 
